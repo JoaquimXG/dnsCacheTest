@@ -1,10 +1,13 @@
 const app = require('express')()
 const loggerMiddleware = require('./app/middleware/logger')
 const log = require("./app/utils/logger")
+const dnsTest = require("./app/routes/dns-cache-test")
+
+const {HTTP_PORT} = require("./app/utils/dotenvDefault")
 
 app.use(loggerMiddleware)
 
-const HTTP_PORT = process.argv.length > 2 ? process.argv[2] : 8080
+app.use("/dns/", dnsTest)
 
 app.get("*", (req, res) => {
     jsonResponse = {
