@@ -1,18 +1,11 @@
+const { PARTNER_DNS } = require("../../utils/dotenvDefault")
 const router = require("express").Router()
 const http = require("http")
-const fs = require("fs")
-
-const { PARTNER_ADDRESS } = require("../../utils/dotenvDefault")
+const dnsLog = require("./dnsLog")
+const updateRoute53 = require("./updateRoute53")
 
 WAITING_FOR_CONFIRM = false
 FIRST_REQUEST = true
-
-const dnsLog = dict => {
-    console.log("logging to file")
-    dict = {ts: new Date().toISOString(), ...dict}
-    fs.appendFile("./logs/dns-cache.log", `${JSON.stringify(dict)}\n`,
-     err => { if (err) console.log(err) })
-}
 
 router.get("/test", (req, res) => {
     if (WAITING_FOR_CONFIRM) {
@@ -22,10 +15,10 @@ router.get("/test", (req, res) => {
         if (!FIRST_REQUEST) {
             dnsLog({event: "cacheCleared"})
         }
-
-        //TODO point dns to partner server 
+        
+        updateRoute53()
         WAITING_FOR_CONFIRM = true
-        http.request({ hostname: PARTNER_ADDRESS, port: 80, path: "/dns/confirm", method: "GET" })
+        http.request({ hostname: PARTNER_DNS, port: 80, path: "/dns/confirm", method: "GET" })
 
         res.send("Cache has cleared, updating cache to point to new server")
     }
