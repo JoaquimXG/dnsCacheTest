@@ -16,14 +16,22 @@ const getSequenceToken = async () => {
 module.exports = async dict => {
     events = [{timestamp: new Date().valueOf(), message: JSON.stringify(dict)}]
 
-    let seqToken = await getSequenceToken()
+    while (true) {
+        try {
+            let seqToken = await getSequenceToken()
 
-    const command = new PutLogEventsCommand({
-        logEvents: events,
-        logGroupName: LOG_GROUP_NAME,
-        logStreamName : LOG_STREAM_NAME,
-        sequenceToken: seqToken
-    })
+            const command = new PutLogEventsCommand({
+                logEvents: events,
+                logGroupName: LOG_GROUP_NAME,
+                logStreamName : LOG_STREAM_NAME,
+                sequenceToken: seqToken
+            })
 
-    return await client.send(command)
+            await client.send(command)
+            return
+        }
+        catch {
+            continue
+        }
+    }
 }
