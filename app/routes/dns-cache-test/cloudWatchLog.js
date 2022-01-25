@@ -25,8 +25,5 @@ module.exports = async dict => {
         sequenceToken: seqToken
     })
 
-    let res = await client.send(command)
-    
-    console.log(res)
-    return
+    return await client.send(command)
 }
