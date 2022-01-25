@@ -1,4 +1,4 @@
-const { PARTNER_DNS } = require("../../utils/dotenvDefault")
+const { PARTNER_DNS, PARTNER_IP, LOCAL_IP } = require("../../utils/dotenvDefault")
 const router = require("express").Router()
 const http = require("http")
 const axios = require("axios")
@@ -9,7 +9,7 @@ const log = require("../../utils/logger")
 WAITING_FOR_CONFIRM = false
 FIRST_REQUEST = true
 
-router.get("/test", (req, res) => {
+router.get("/test", async (req, res) => {
     if (WAITING_FOR_CONFIRM) {
         message = "Waiting for confirmation from partner server"
         log.info(message)
@@ -17,20 +17,19 @@ router.get("/test", (req, res) => {
     }
     else {
         if (!FIRST_REQUEST) {
-            dnsLog({ event: "cacheCleared" })
+            dnsLog({ event: "requestRecieved" , server: LOCAL_IP})
         }
 
-        updateRoute53()
-        WAITING_FOR_CONFIRM = true
-        axios.get(`http://${PARTNER_DNS}/dns/confirm`)
-            .then(res => {
-                log.info(res.data)
-            })
-            .catch(err => {
-                log.error(err)
-            })
+        await updateRoute53()
+        dnsLog({event: "DNSUpdated", target: PARTNER_IP})
 
-        message = "Cache has cleared, updating cache to point to new server"
+        WAITING_FOR_CONFIRM = true
+        log.info("Sending confirmation to partner")
+        axios.get(`http://${PARTNER_DNS}/dns/confirm`)
+            .then(res => {})
+            .catch(err => {})
+
+        message = `Cache has cleared, pointing DNS to ${PARTNER_IP}`
         log.info(message)
         res.send(message)
     }
@@ -45,7 +44,7 @@ router.get("/confirm", (req, res) => {
         res.send(message)
     }
     else {
-        dnsLog({ error: true, event: "Confirmation recieved before waiting for confirmation" })
+        // dnsLog({ error: true, event: "Confirmation recieved before waiting for confirmation" })
         message = "Confirmation recieved before waiting for confirmation"
         log.info(message)
         res.send(message)
