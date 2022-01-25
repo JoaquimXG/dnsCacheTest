@@ -1,6 +1,5 @@
 const { PARTNER_DNS, PARTNER_IP, LOCAL_IP, LOCAL_DNS } = require("../../utils/dotenvDefault")
 const router = require("express").Router()
-const http = require("http")
 const axios = require("axios")
 const dnsLog = require("./dnsLog")
 const updateRoute53 = require("./updateRoute53")
