@@ -1,7 +1,6 @@
-const { PARTNER_DNS, PARTNER_IP, LOCAL_IP, LOCAL_DNS } = require("../../utils/dotenvDefault")
+const { PARTNER_DNS, PARTNER_IP, LOCAL_DNS } = require("../../utils/dotenvDefault")
 const router = require("express").Router()
 const axios = require("axios")
-const dnsLog = require("./dnsLog")
 const updateRoute53 = require("./updateRoute53")
 const log = require("../../utils/logger")
 const cloudWatchLog = require("./cloudWatchLog")
@@ -19,14 +18,12 @@ router.get("/test", async (req, res) => {
     else {
         if (!FIRST_REQUEST) {
             dnsCacheDelay = (new Date() - DNS_CHANGE_CONFIRM_TS) /1000
-            dnsLog({ event: "CacheUpdated" , host: LOCAL_DNS, delay: dnsCacheDelay})
             cloudWatchLog({ event: "CacheUpdated" , host: LOCAL_DNS, delay: dnsCacheDelay})
         }
         message = `Cache has cleared, pointing DNS to ${PARTNER_IP}`
         log.debug(message)
 
         await updateRoute53()
-        dnsLog({event: "DNSUpdated", host: LOCAL_DNS, target: PARTNER_IP})
         cloudWatchLog({event: "DNSUpdated", host: LOCAL_DNS, target: PARTNER_IP})
 
         WAITING_FOR_CONFIRM = true
@@ -43,7 +40,6 @@ router.get("/confirm", (req, res) => {
     if (WAITING_FOR_CONFIRM) {
         WAITING_FOR_CONFIRM = false
         DNS_CHANGE_CONFIRM_TS = new Date()
-        dnsLog({event: "ConfirmationReceived", host: LOCAL_DNS})
         cloudWatchLog({event: "ConfirmationReceived", host: LOCAL_DNS})
         message = "Confirmation recieved"
         log.info(message)
@@ -52,14 +48,12 @@ router.get("/confirm", (req, res) => {
     else if (FIRST_REQUEST) {
         FIRST_REQUEST = false
         DNS_CHANGE_CONFIRM_TS = new Date()
-        dnsLog({event: "ConfirmationReceived", host: LOCAL_DNS})
         cloudWatchLog({event: "ConfirmationReceived", host: LOCAL_DNS})
         message = "First confirmation received"
         log.info(message)
         res.send(message)
     }
     else {
-        dnsLog({ error: true, event: "Confirmation recieved before waiting for confirmation" })
         cloudWatchLog({ error: true, event: "Confirmation recieved before waiting for confirmation" })
         message = "Confirmation recieved before waiting for confirmation"
         log.info(message)
