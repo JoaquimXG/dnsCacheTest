@@ -4,7 +4,6 @@ packages:
  - npm
 
 runcmd:
- - [git, clone, 'https://github.com/JoaquimXG/http-echo.git', /home/ubuntu/http-echo] 
- - [cd, /home/ubuntu/http-echo]
+ - [git, clone, 'https://github.com/JoaquimXG/dnsCacheTest.git', /home/ubuntu/dnsCacheTest] 
+ - [cd, /home/ubuntu/dnsCacheTest]
  - [npm, ci]
- - [npm, run, prod]
