@@ -6,6 +6,7 @@ const dnsLog = require("./dnsLog")
 const updateRoute53 = require("./updateRoute53")
 const log = require("../../utils/logger")
 
+DNS_CHANGE_CONFIRM_TS = null
 WAITING_FOR_CONFIRM = false
 FIRST_REQUEST = true
 
@@ -17,7 +18,8 @@ router.get("/test", async (req, res) => {
     }
     else {
         if (!FIRST_REQUEST) {
-            dnsLog({ event: "requestRecieved" , server: LOCAL_IP})
+            dnsCacheDelay = (new Date() - DNS_CHANGE_CONFIRM_TS) /1000
+            dnsLog({ event: "requestRecieved" , server: LOCAL_IP, delay: dnsCacheDelay})
         }
         message = `Cache has cleared, pointing DNS to ${PARTNER_IP}`
         log.debug(message)
@@ -38,12 +40,14 @@ router.get("/test", async (req, res) => {
 router.get("/confirm", (req, res) => {
     if (WAITING_FOR_CONFIRM) {
         WAITING_FOR_CONFIRM = false
+        DNS_CHANGE_CONFIRM_TS = new Date()
         message = "Confirmation recieved"
         log.info(message)
         res.send(message)
     }
     else if (FIRST_REQUEST) {
         FIRST_REQUEST = false
+        DNS_CHANGE_CONFIRM_TS = new Date()
         message = "First confirmation received"
         log.info(message)
         res.send(message)
