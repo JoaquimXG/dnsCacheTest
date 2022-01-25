@@ -12,7 +12,7 @@ FIRST_REQUEST = true
 router.get("/test", async (req, res) => {
     if (WAITING_FOR_CONFIRM) {
         message = "Refresh too early - Cache not cleared - Pending confirmation"
-        log.info(message)
+        log.warn(message)
         res.send(message)
     }
     else {
@@ -20,13 +20,13 @@ router.get("/test", async (req, res) => {
             dnsLog({ event: "requestRecieved" , server: LOCAL_IP})
         }
         message = `Cache has cleared, pointing DNS to ${PARTNER_IP}`
-        log.info(message)
+        log.debug(message)
 
         await updateRoute53()
         dnsLog({event: "DNSUpdated", target: PARTNER_IP})
 
         WAITING_FOR_CONFIRM = true
-        log.info(`Sending confirmation to partner: ${PARTNER_DNS}`)
+        log.debug(`Sending confirmation to partner: ${PARTNER_DNS}`)
         axios.get(`http://${PARTNER_DNS}/dns/confirm`)
             .then(res => {})
             .catch(err => {})
