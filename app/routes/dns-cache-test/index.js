@@ -11,7 +11,7 @@ FIRST_REQUEST = true
 
 router.get("/test", async (req, res) => {
     if (WAITING_FOR_CONFIRM) {
-        message = "Waiting for confirmation from partner server"
+        message = "Refresh too early - Cache not cleared - Pending confirmation"
         log.info(message)
         res.send(message)
     }
@@ -26,7 +26,7 @@ router.get("/test", async (req, res) => {
         dnsLog({event: "DNSUpdated", target: PARTNER_IP})
 
         WAITING_FOR_CONFIRM = true
-        log.info("Sending confirmation to partner")
+        log.info(`Sending confirmation to partner: ${PARTNER_DNS}`)
         axios.get(`http://${PARTNER_DNS}/dns/confirm`)
             .then(res => {})
             .catch(err => {})
@@ -38,7 +38,7 @@ router.get("/test", async (req, res) => {
 router.get("/confirm", (req, res) => {
     if (WAITING_FOR_CONFIRM) {
         WAITING_FOR_CONFIRM = false
-        message = "Confirmation that DNS has updated to point to second server recieved"
+        message = "Confirmation recieved"
         log.info(message)
         res.send(message)
     }
@@ -49,7 +49,7 @@ router.get("/confirm", (req, res) => {
         res.send(message)
     }
     else {
-        // dnsLog({ error: true, event: "Confirmation recieved before waiting for confirmation" })
+        dnsLog({ error: true, event: "Confirmation recieved before waiting for confirmation" })
         message = "Confirmation recieved before waiting for confirmation"
         log.info(message)
         res.send(message)
