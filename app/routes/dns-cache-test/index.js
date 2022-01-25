@@ -19,6 +19,8 @@ router.get("/test", async (req, res) => {
         if (!FIRST_REQUEST) {
             dnsLog({ event: "requestRecieved" , server: LOCAL_IP})
         }
+        message = `Cache has cleared, pointing DNS to ${PARTNER_IP}`
+        log.info(message)
 
         await updateRoute53()
         dnsLog({event: "DNSUpdated", target: PARTNER_IP})
@@ -29,8 +31,6 @@ router.get("/test", async (req, res) => {
             .then(res => {})
             .catch(err => {})
 
-        message = `Cache has cleared, pointing DNS to ${PARTNER_IP}`
-        log.info(message)
         res.send(message)
     }
 })
@@ -38,8 +38,13 @@ router.get("/test", async (req, res) => {
 router.get("/confirm", (req, res) => {
     if (WAITING_FOR_CONFIRM) {
         WAITING_FOR_CONFIRM = false
-        FIRST_REQUEST = false
         message = "Confirmation that DNS has updated to point to second server recieved"
+        log.info(message)
+        res.send(message)
+    }
+    else if (FIRST_REQUEST) {
+        FIRST_REQUEST = false
+        message = "First confirmation received"
         log.info(message)
         res.send(message)
     }
