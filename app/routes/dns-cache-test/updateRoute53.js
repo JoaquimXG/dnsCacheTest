@@ -36,7 +36,6 @@ const updateRecord = async (name, type, values) => {
 
     const command = new ChangeResourceRecordSetsCommand({ChangeBatch: {Changes: [{Action: "UPSERT", ResourceRecordSet: newRecordSet}]} ,HostedZoneId: AWS_ZONE_ID})
     const res = await client.send(command)
-    log.warn(res)
 }
 
 module.exports = async () => {
