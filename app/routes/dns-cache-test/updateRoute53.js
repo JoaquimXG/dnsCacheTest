@@ -30,7 +30,7 @@ const updateRecord = async (name, type, values) => {
     newRecordSet = {
         Name: name,
         Type: type,
-        TTL: 60,
+        TTL: 1,
         ResourceRecords: values.map(value => ({Value: value}))
     }
 
