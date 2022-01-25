@@ -37,19 +37,12 @@ router.get("/test", async (req, res) => {
 })
 
 router.get("/confirm", (req, res) => {
-    if (WAITING_FOR_CONFIRM) {
+    if (WAITING_FOR_CONFIRM || FIRST_REQUEST) {
         WAITING_FOR_CONFIRM = false
-        DNS_CHANGE_CONFIRM_TS = new Date()
-        cloudWatchLog({event: "ConfirmationReceived", host: LOCAL_DNS})
-        message = "Confirmation recieved"
-        log.info(message)
-        res.send(message)
-    }
-    else if (FIRST_REQUEST) {
         FIRST_REQUEST = false
         DNS_CHANGE_CONFIRM_TS = new Date()
         cloudWatchLog({event: "ConfirmationReceived", host: LOCAL_DNS})
-        message = "First confirmation received"
+        message = FIRST_REQUEST ?  "First confirmation received" : "Confirmation recieved"
         log.info(message)
         res.send(message)
     }

@@ -30,9 +30,10 @@ module.exports = async dict => {
             await client.send(command)
             return
         }
-        catch(e) {
-            console.error(e)
+        catch {
             continue
         }
     }
+    
+    
 }
