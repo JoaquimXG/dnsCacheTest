@@ -5,7 +5,7 @@ const dnsTest = require("./app/routes/dns-cache-test")
 
 const { HTTP_PORT } = require("./app/utils/dotenvDefault")
 
-app.use(loggerMiddleware)
+// app.use(loggerMiddleware)
 
 app.use("/dns/", dnsTest)
 
