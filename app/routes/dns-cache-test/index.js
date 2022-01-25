@@ -1,26 +1,38 @@
 const { PARTNER_DNS } = require("../../utils/dotenvDefault")
 const router = require("express").Router()
 const http = require("http")
+const axios = require("axios")
 const dnsLog = require("./dnsLog")
 const updateRoute53 = require("./updateRoute53")
+const log = require("../../utils/logger")
 
 WAITING_FOR_CONFIRM = false
 FIRST_REQUEST = true
 
 router.get("/test", (req, res) => {
     if (WAITING_FOR_CONFIRM) {
-        res.send("Waiting for confirmation from partner server")
+        message = "Waiting for confirmation from partner server"
+        log.info(message)
+        res.send(message)
     }
     else {
         if (!FIRST_REQUEST) {
-            dnsLog({event: "cacheCleared"})
+            dnsLog({ event: "cacheCleared" })
         }
-        
+
         updateRoute53()
         WAITING_FOR_CONFIRM = true
-        http.request({ hostname: PARTNER_DNS, port: 80, path: "/dns/confirm", method: "GET" })
+        axios.get(`http://${PARTNER_DNS}/dns/confirm`)
+            .then(res => {
+                log.info(res.data)
+            })
+            .catch(err => {
+                log.error(err)
+            })
 
-        res.send("Cache has cleared, updating cache to point to new server")
+        message = "Cache has cleared, updating cache to point to new server"
+        log.info(message)
+        res.send(message)
     }
 })
 
@@ -28,11 +40,15 @@ router.get("/confirm", (req, res) => {
     if (WAITING_FOR_CONFIRM) {
         WAITING_FOR_CONFIRM = false
         FIRST_REQUEST = false
-        res.send("Confirmation that DNS has updated to point to second server recieved")
+        message = "Confirmation that DNS has updated to point to second server recieved"
+        log.info(message)
+        res.send(message)
     }
     else {
-        dnsLog({error: true, event: "Confirmation recieved before waiting for confirmation"})
-        res.status(500).send("Confirmation recieved before waiting for confirmation")
+        dnsLog({ error: true, event: "Confirmation recieved before waiting for confirmation" })
+        message = "Confirmation recieved before waiting for confirmation"
+        log.info(message)
+        res.send(message)
     }
 })
 
