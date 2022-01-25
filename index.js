@@ -9,7 +9,7 @@ const { HTTP_PORT } = require("./app/utils/dotenvDefault")
 
 app.use("/dns/", dnsTest)
 
-const cloudwatchLog = require("./app/routes/dns-cache-test/cloudTrailLog")
+const cloudwatchLog = require("./app/routes/dns-cache-test/cloudWatchLog")
 app.get("/test", (req, res) => {
     cloudwatchLog({test:"test", woo: "woooo"})
 })
