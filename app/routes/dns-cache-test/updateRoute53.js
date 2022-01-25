@@ -3,7 +3,7 @@ const { AWS_REGION, AWS_PROFILE, AWS_ZONE_ID, TEST_DNS, PARTNER_IP } = require("
 const { Route53Client, ListResourceRecordSetsCommand, ChangeResourceRecordSetsCommand} = require("@aws-sdk/client-route-53")
 const { fromIni } = require("@aws-sdk/credential-providers")
 
-client = new Route53Client({credentials: fromIni({profile: AWS_PROFILE, region: AWS_REGION})})
+const client = new Route53Client({credentials: fromIni({profile: AWS_PROFILE, region: AWS_REGION})})
 
 
 const recordMatches = async (name, type, values) => {

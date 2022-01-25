@@ -9,6 +9,11 @@ const { HTTP_PORT } = require("./app/utils/dotenvDefault")
 
 app.use("/dns/", dnsTest)
 
+const cloudwatchLog = require("./app/routes/dns-cache-test/cloudTrailLog")
+app.get("/test", (req, res) => {
+    cloudwatchLog({test:"test", woo: "woooo"})
+})
+
 app.get("*", (req, res) => {
     jsonResponse = {
         req: {
@@ -28,4 +33,4 @@ app.get("*", (req, res) => {
     res.send(`<pre>${JSON.stringify(jsonResponse, null, 2)}</pre>`)
 })
 
-app.listen(HTTP_PORT, () =>log.info(`Example app listening on port ${HTTP_PORT}`))
+app.listen(HTTP_PORT, () => log.info(`Example app listening on port ${HTTP_PORT}`))
